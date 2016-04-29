@@ -1,17 +1,17 @@
-Opauth-Wunderlist
+Opauth-Bitbucket
 =============
-[Opauth][1] strategy for Wunderlist authentication.
+[Opauth][1] strategy for Bitbucket authentication.
 
-Implemented based on https://developer.wunderlist.com/documentation/concepts/authorization
+Implemented based on https://confluence.atlassian.com/bitbucket/oauth-on-bitbucket-cloud-238027431.html
 
 Getting started
 ----------------
-1. Install Opauth-Wunderlist:
+1. Install Opauth-Bitbucket:
 
    Using git:
    ```bash
    cd path_to_opauth/Strategy
-   git clone https://github.com/t1mmen/opauth-wunderlist.git wunderlist
+   git clone https://github.com/t1mmen/opauth-bitbucket.git bitbucket
    ```
 
   Or, using [Composer](https://getcomposer.org/), just add this to your `composer.json`:
@@ -19,18 +19,18 @@ Getting started
    ```bash
    {
        "require": {
-           "t1mmen/opauth-wunderlist": "*"
+           "t1mmen/opauth-bitbucket": "*"
        }
    }
    ```
    Then run `composer install`.
 
 
-2. Create Wunderlist application at https://developer.wunderlist.com/apps/new
+2. Create Bitbucket application at https://bitbucket.org/account under "Oauth" in left menu. This implementation requires the "email" scope set.
 
-3. Configure Opauth-Wunderlist strategy with at least `Client ID` and `Client Secret`.
+3. Configure Opauth-Bitbucket strategy with at least `Client ID` and `Client Secret`.
 
-4. Direct user to `http://path_to_opauth/wunderlist` to authenticate
+4. Direct user to `http://path_to_opauth/bitbucket` to authenticate
 
 Strategy configuration
 ----------------------
@@ -39,15 +39,15 @@ Required parameters:
 
 ```php
 <?php
-'Wunderlist' => array(
-	'client_id' => 'YOUR CLIENT ID',
-	'client_secret' => 'YOUR CLIENT SECRET'
+'Bitbucket' => array(
+  'client_id' => 'YOUR CLIENT ID',
+  'client_secret' => 'YOUR CLIENT SECRET'
 )
 ```
 
 License
 ---------
-Opauth-Wunderlist is MIT Licensed
+Opauth-Bitbucket is MIT Licensed
 Copyright © 2016 Timm Stokke (http://timm.stokke.me)
 
 [1]: https://github.com/opauth/opauth

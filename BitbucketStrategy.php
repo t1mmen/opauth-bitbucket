@@ -1,6 +1,6 @@
 <?php
 /**
- * Wunderlist strategy for Opauth
+ * Bitbucket strategy for Opauth
  *
  * Based on work by U-Zyn Chua (http://uzyn.com)
  *
@@ -8,17 +8,17 @@
  *
  * @copyright    Copyright © 2015 Timm Stokke (http://timm.stokke.me)
  * @link         http://opauth.org
- * @package      Opauth.WunderlistStrategy
+ * @package      Opauth.BitbucketStrategy
  * @license      MIT License
  */
 
 
 /**
- * Wunderlist strategy for Opauth
+ * Bitbucket strategy for Opauth
  *
- * @package			Opauth.Wunderlist
+ * @package			Opauth.Bitbucket
  */
-class WunderlistStrategy extends OpauthStrategy {
+class BitbucketStrategy extends OpauthStrategy {
 
 	/**
 	 * Compulsory config keys, listed as unassociative arrays
@@ -42,12 +42,10 @@ class WunderlistStrategy extends OpauthStrategy {
 	 * Auth request
 	 */
 	public function request() {
-		$url = 'https://www.wunderlist.com/oauth/authorize';
+		$url = 'https://bitbucket.org/site/oauth2/authorize';
 		$params = array(
 			'response_type' => 'code',
 			'client_id' => $this->strategy['client_id'],
-			'redirect_uri' => $this->strategy['redirect_uri'],
-			'state' => md5('random-client-id'.$this->strategy['client_id'])
 		);
 
 		foreach ($this->optionals as $key) {
@@ -63,19 +61,24 @@ class WunderlistStrategy extends OpauthStrategy {
 	public function oauth2callback() {
 		if (array_key_exists('code', $_GET) && !empty($_GET['code'])) {
 			$code = $_GET['code'];
-			$url = 'https://www.wunderlist.com/oauth/access_token';
+			$url = 'https://bitbucket.org/site/oauth2/access_token';
+
+			$cred = base64_encode($this->strategy['client_id'].':'.$this->strategy['client_secret']);
 
 			$params = array(
 				'code' => $code,
 				'client_id' => $this->strategy['client_id'],
 				'client_secret' => $this->strategy['client_secret'],
 				'grant_type' => 'authorization_code',
-				'state' => md5('random-client-id'.$this->strategy['client_id'])
 			);
 
-			if (!empty($this->strategy['state'])) $params['state'] = $this->strategy['state'];
+			$options['http'] = array(
+				'header' => "Authorization: Basic ".$cred."\r\nContent-type: application/x-www-form-urlencoded",
+				'method' => 'POST',
+				'content' => http_build_query($params, '', '&')
+				);
 
-			$response = $this->serverPost($url, $params, null, $headers);
+			$response = $this->httpRequest($url, $options);
 			$results = json_decode($response,true);
 
 			if (!empty($results) && !empty($results['access_token'])) {
@@ -83,13 +86,17 @@ class WunderlistStrategy extends OpauthStrategy {
 				$user = $this->user($results['access_token']);
 
 				$this->auth = array(
-					'uid' => $user['id'],
+					'uid' => $user['uuid'],
 					'info' => array(
-						'name' => $user['name'],
-						'email' => $user['email'],
+						'name' => $user['display_name'],
+						'nickname' => $user['username'],
+						'urls' => array(
+							'website' => $user['website'],
+						),
 					),
 					'credentials' => array(
-						'token' => $results['access_token']
+						'token' => $results['access_token'],
+						'refresh_token' => $results['refresh_token'],
 					),
 					'raw' => $user
 				);
@@ -121,7 +128,7 @@ class WunderlistStrategy extends OpauthStrategy {
 	}
 
 	/**
-	 * Queries Wunderlist API for user info
+	 * Queries Bitbucket API for user info
 	 *
 	 * @param string $access_token
 	 * @return array Parsed JSON results
@@ -131,10 +138,9 @@ class WunderlistStrategy extends OpauthStrategy {
 
 		$options['http']['header'] = "Content-Type: application/json";
 		$options['http']['header'] .= "\r\nAccept: application/json";
-		$options['http']['header'] .= "\r\nX-Access-Token: ".$access_token;
-		$options['http']['header'] .= "\r\nX-Client-ID: ".$this->strategy['client_id'];
+		$options['http']['header'] .= "\r\nAuthorization: Bearer ".$access_token;
 
-		$accountDetails = $this->serverGet('https://a.wunderlist.com/api/v1/user', array(), $options);
+		$accountDetails = $this->serverGet('https://api.bitbucket.org/2.0/user', array(), $options);
 
 		if (!empty($accountDetails)) {
 			return $this->recursiveGetObjectVars(json_decode($accountDetails,true));
@@ -142,7 +148,7 @@ class WunderlistStrategy extends OpauthStrategy {
 		else {
 			$error = array(
 				'code' => 'userinfo_error',
-				'message' => 'Failed when attempting to query Wunderlist API for user information',
+				'message' => 'Failed when attempting to query Bitbucket API for user information',
 				'raw' => array(
 					'response' => $user,
 					'headers' => $headers
