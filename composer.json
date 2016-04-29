@@ -1,8 +1,8 @@
 {
-    "name": "t1mmen/opauth-wunderlist",
-    "description": "Opauth strategy for Wunderlist",
-    "keywords": ["authentication","auth","wunderlist", "opauth", "oauth", "timetracking"],
-    "homepage": "https://github.com/t1mmen/opauth-wunderlist",
+    "name": "t1mmen/opauth-bitbucket",
+    "description": "Opauth strategy for Bitbucket",
+    "keywords": ["authentication","auth","bitbucket", "opauth", "oauth", "timetracking"],
+    "homepage": "https://github.com/t1mmen/opauth-bitbucket",
     "license": "MIT",
     "authors": [
         {
